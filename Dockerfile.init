@@ -1,5 +1,10 @@
-FROM k8s.gcr.io/busybox 
+FROM registry.access.redhat.com/ubi9/ubi-minimal as builder
+RUN microdnf -y install maven-openjdk11.noarch
+ADD . /tackle-keycloak-theme
+WORKDIR /tackle-keycloak-theme
+RUN mvn clean install
 
-ADD target/tackle-keycloak-theme-*.jar /
+FROM registry.access.redhat.com/ubi9/ubi-minimal
+COPY --from=builder /tackle-keycloak-theme/target/tackle-keycloak-theme-*.jar /
 
 ENTRYPOINT [ "sh", "-c", "cp /tackle-keycloak-theme-* /deployments" ]
